@@ -1,0 +1,450 @@
+:root {
+  --bg-top: rgb(90, 61, 122);
+  --bg-bottom: rgb(72, 52, 97);
+  --panel: rgba(72, 52, 97, 0.82);
+  --panel-border: rgba(248, 248, 184, 0.18);
+  --text-main: rgb(248, 248, 184);
+  --text-soft: rgba(248, 248, 184, 0.78);
+  --accent: rgb(245, 241, 89);
+  --accent-dark: rgb(189, 177, 58);
+  --shadow: 0 18px 50px rgba(40, 24, 58, 0.32);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top left, rgba(248, 248, 184, 0.18), transparent 35%),
+    linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+}
+
+.app {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.app.is-menu {
+  width: min(920px, calc(100% - 32px));
+  padding-top: 32px;
+}
+
+.app.is-lantern {
+  width: min(760px, calc(100% - 24px));
+}
+
+.hud {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.hud__brand h1,
+.tips h2 {
+  margin: 0;
+}
+
+.hud__title-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.hud__shortcut {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 3px;
+  color: var(--text-soft);
+}
+
+.hud__shortcut p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.hud__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.skill-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 18px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.skill-hud {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.skill-icons-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.skill-panel--canvas {
+  padding: 0;
+  order: 0;
+}
+
+.app:not(.is-lantern) .skill-hud {
+  display: none !important;
+}
+
+.move-skill-panel {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  order: 1;
+}
+
+.move-skill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.move-skill__icon-wrap {
+  --cooldown-progress: 0turn;
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(248, 248, 184, 0.18);
+}
+
+.move-skill__icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.move-skill__mask {
+  position: absolute;
+  inset: 0;
+  background:
+    conic-gradient(
+      from -90deg,
+      rgba(0, 0, 0, 0.62) 0turn,
+      rgba(0, 0, 0, 0.62) var(--cooldown-progress),
+      rgba(0, 0, 0, 0) var(--cooldown-progress),
+      rgba(0, 0, 0, 0) 1turn
+    );
+  pointer-events: none;
+}
+
+.move-skill__key {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(72, 52, 97, 0.95);
+  background: rgb(245, 241, 89);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.move-skill__label {
+  font-size: 11px;
+  color: var(--text-main);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.move-skill.is-active .move-skill__icon-wrap {
+  box-shadow:
+    0 0 0 2px rgba(245, 241, 89, 0.85),
+    0 10px 20px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(248, 248, 184, 0.22);
+}
+
+.move-skill.is-unavailable {
+  opacity: 0.68;
+}
+
+.move-skill:focus-visible .move-skill__icon-wrap {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.7),
+    0 10px 20px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(248, 248, 184, 0.22);
+}
+
+.skill-icon-wrap {
+  --cooldown-progress: 0turn;
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(248, 248, 184, 0.18);
+}
+
+.skill-panel__icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.skill-cooldown-mask {
+  position: absolute;
+  inset: 0;
+  background:
+    conic-gradient(
+      from -90deg,
+      rgba(0, 0, 0, 0.62) 0turn,
+      rgba(0, 0, 0, 0.62) var(--cooldown-progress),
+      rgba(0, 0, 0, 0) var(--cooldown-progress),
+      rgba(0, 0, 0, 0) 1turn
+    );
+  pointer-events: none;
+}
+
+.skill-count {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(72, 52, 97, 0.95);
+  background: rgb(245, 241, 89);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(217, 95, 0, 0.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(217, 95, 0, 0.3);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button--ghost {
+  color: var(--text-main);
+  background: rgba(248, 248, 184, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(248, 248, 184, 0.18);
+}
+
+.game-shell {
+  display: block;
+}
+
+.game-panel {
+  position: relative;
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.game-panel {
+  padding: 18px;
+}
+
+.game-canvas {
+  display: block;
+  width: 100%;
+  height: clamp(400px, 62vh, 560px);
+  border-radius: 22px;
+  border: 2px dashed rgba(248, 248, 184, 0.16);
+  background:
+    linear-gradient(rgba(248, 248, 184, 0.08), rgba(248, 248, 184, 0.03)),
+    linear-gradient(180deg, rgb(90, 61, 122) 0%, rgb(72, 52, 97) 100%);
+}
+
+.app.is-lantern .game-canvas {
+  height: clamp(520px, 78dvh, 920px);
+}
+
+@media (max-width: 840px) {
+  .app,
+  .app.is-menu,
+  .app.is-lantern {
+    width: min(100%, calc(100% - 20px));
+  }
+
+  .hud {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .skill-panel {
+    width: 100%;
+    order: 3;
+  }
+
+  .skill-hud {
+    top: 46px;
+  }
+
+  .hud__title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .hud__shortcut {
+    display: none;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .game-canvas {
+    height: clamp(320px, 52dvh, 440px);
+  }
+
+  .app.is-lantern .game-canvas {
+    height: clamp(420px, 68dvh, 760px);
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 12px 0 20px;
+  }
+
+  .hud {
+    gap: 12px;
+    margin-bottom: 14px;
+    border-radius: 18px;
+  }
+
+  .eyebrow {
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+
+  .hud__actions {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .game-panel {
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .skill-hud {
+    top: 18px;
+    width: calc(100% - 20px);
+  }
+
+  .skill-icons-row {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .move-skill-panel {
+    gap: 6px;
+  }
+
+  .move-skill__icon-wrap,
+  .skill-icon-wrap {
+    width: 52px;
+    height: 52px;
+  }
+
+  .move-skill__label {
+    font-size: 10px;
+  }
+
+  .game-canvas {
+    border-radius: 16px;
+  }
+
+  .app.is-lantern .game-canvas {
+    height: clamp(420px, 64dvh, 620px);
+  }
+}
