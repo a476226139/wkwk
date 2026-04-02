@@ -5,6 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>太玄经模拟器</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+  #hudShortcut p {
+    font-size: 1.25rem;
+    font-weight: bold;
+    line-height: 1.8;
+  }
+  /* 让标题和说明横向排列，标题自动居中 */
+  .hud__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 64px;
+    position: relative;
+  }
+  .hud__title-row h1 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 2rem;
+  }
+  #hudShortcut {
+    min-width: 260px;
+    margin-left: 16px;
+    text-align: left;
+    align-self: center;
+  }
+  /* 禁止双指缩放和滚动 */
+  #gameCanvas {
+  touch-action: none;
+  } 
+  </style>
 </head>
 <body>
   <div class="app">
@@ -15,7 +46,8 @@
           <h1>太玄经模拟器</h1>
           <div id="hudShortcut" class="hud__shortcut" hidden>
             <p>奇门飞宫快捷键：鼠标左键</p>
-            <p>纵横三才快捷键：1/2/3 + 鼠标左键</p>
+            <p>纵横三才快捷键：1/2/3 </p>
+            <p>用户移动：鼠标右键 </p>
           </div>
         </div>
       </div>

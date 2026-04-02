@@ -328,8 +328,9 @@ class LanternAgent {
       return false;
     }
 
-    targetNode.x = target.x;
-    targetNode.y = target.y;
+    // 只设置目标，不直接赋值位置
+    targetNode.targetX = target.x;
+    targetNode.targetY = target.y;
     this.skill.moveCooldownUntil = now + this.skillConfig.moveCooldown;
     this.skill.nodes.sort((a, b) => a.id - b.id);
     return true;
@@ -367,6 +368,25 @@ class LanternAgent {
     if (!this.ally) {
       return;
     }
+    // === 节点平滑动画 ===
+  const moveSpeed = 18; // 每秒移动多少格
+  for (const node of this.skill.nodes) {
+    if (node.targetX !== undefined && node.targetY !== undefined) {
+      const dx = node.targetX - node.x;
+      const dy = node.targetY - node.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0.01) {
+        const step = Math.min(moveSpeed * (1 / 60), dist);
+        node.x += dx / dist * step;
+        node.y += dy / dist * step;
+      } else {
+        node.x = node.targetX;
+        node.y = node.targetY;
+        delete node.targetX;
+        delete node.targetY;
+      }
+    }
+  }
 
     const allyCenter = this.getAllyCenter();
     let vanishedByDistance = false;

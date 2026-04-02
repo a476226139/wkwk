@@ -324,7 +324,7 @@ function updateSkillPanel(now = 0) {
     : castCooldownProgress;
 
   skillCooldownMask.hidden = overlayProgress <= 0;
-  skillIconWrap.style.setProperty("--cooldown-progress", `${overlayProgress}turn`);
+  skillIconWrap.  style.setProperty("--cooldown-progress", `${overlayProgress}turn`);
 }
 
 function updateMoveSkillPanel(now = 0) {
@@ -900,51 +900,108 @@ function drawAlly() {
 }
 
 function drawLanternTriangle() {
-  if (game.lantern.skill.nodes.length !== 3) {
-    return;
-  }
+  if (game.lantern.skill.nodes.length !== 3) return;
 
   const points = game.lantern.skill.nodes
     .slice()
     .sort((a, b) => a.id - b.id)
     .map((node) => logicPointToPixel(node));
 
-  // ====== 绚丽LED特效连线 ======
   ctx.save();
-  ctx.lineWidth = 8;
-  ctx.shadowColor = "rgba(180,132,255,0.85)";
+
+  // 主色：淡紫色+亮白
+  const mainColor = "rgba(200,180,255,0.85)";
+  const glowColor = "rgba(220,200,255,0.35)";
+  const whiteGlow = "rgba(255,255,255,0.85)";
+  const ledCount = 44;
+  const ledRadius = 2.5;
+  const glowRadius = 10;
+  const now = performance.now() / 1000;
+  const flowSpeed = 0.7;
+
+  // 底层白色发光线
+  ctx.save();
+  ctx.strokeStyle = whiteGlow;
+  ctx.lineWidth = 7;
+  ctx.shadowColor = whiteGlow;
   ctx.shadowBlur = 18;
-
-  // 动态渐变色，随时间变换
-  const t = Date.now() / 600;
-  function getColor(offset) {
-    return `hsl(${(t * 60 + offset) % 360},100%,65%)`;
-  }
-
-  // 三条边分别渐变
-  for (let i = 0; i < 3; i++) {
-    const a = points[i];
-    const b = points[(i + 1) % 3];
-    const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-    grad.addColorStop(0, getColor(i * 120));
-    grad.addColorStop(1, getColor((i + 1) * 120));
-    ctx.strokeStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
-  }
-
-  // 可选：三角形内发光
-  ctx.globalAlpha = 0.18;
-  ctx.fillStyle = getColor(60);
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
   ctx.lineTo(points[1].x, points[1].y);
   ctx.lineTo(points[2].x, points[2].y);
   ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+
+  // 主线条（细淡紫色）
+  ctx.save();
+  ctx.strokeStyle = mainColor;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = mainColor;
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  ctx.lineTo(points[1].x, points[1].y);
+  ctx.lineTo(points[2].x, points[2].y);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+
+  // 灯串动画（亮白色灯珠，带淡紫色发光）
+  for (let i = 0; i < 3; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % 3];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const offset = ((now * flowSpeed) % 1);
+
+    for (let j = 0; j <= ledCount; j++) {
+      const t = ((j / ledCount) + offset) % 1;
+      const x = a.x + dx * t;
+      const y = a.y + dy * t;
+
+      // 灯珠高亮流动
+      const highlight = Math.pow(Math.sin(now * 2 + t * Math.PI * 2), 8);
+      const alpha = 0.45 + 0.55 * Math.abs(highlight);
+
+      // 外发光（淡紫色+白色）
+      ctx.save();
+      ctx.globalAlpha = 0.13 + 0.22 * Math.abs(highlight);
+      ctx.beginPath();
+      ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
+      ctx.fillStyle = glowColor;
+      ctx.shadowColor = whiteGlow;
+      ctx.shadowBlur = glowRadius + 6;
+      ctx.fill();
+      ctx.restore();
+
+      // 主体灯珠（亮白色）
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(x, y, ledRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = mainColor;
+      ctx.shadowBlur = 10 + 10 * Math.abs(highlight);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // 三角形内淡淡发光
+  ctx.save();
+  ctx.globalAlpha = 0.08;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  ctx.lineTo(points[1].x, points[1].y);
+  ctx.lineTo(points[2].x, points[2].y);
+  ctx.closePath();
+  ctx.fillStyle = whiteGlow;
+  ctx.shadowColor = mainColor;
+  ctx.shadowBlur = 32;
   ctx.fill();
-  ctx.globalAlpha = 1;
+  ctx.restore();
+
   ctx.restore();
 }
 
@@ -977,11 +1034,23 @@ function drawLanternSkillNode(node) {
   ctx.arc(center.x, center.y, radius * 0.55, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = UI.white;
+  // 放大字体，锐化描边
+  ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  ctx.font = `bold ${Math.max(14, radius * 1.35)}px "Microsoft YaHei", Arial`;
+  // 字体放大一倍
+  ctx.font = `bold ${Math.max(28, radius * 2.7)}px "Microsoft YaHei", Arial`;
+  // 描边更锐利
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "rgba(255, 255, 120, 0.92)";
+  ctx.shadowColor = "rgba(255, 255, 120, 0.65)";
+  ctx.shadowBlur = 4;
+  ctx.strokeText(String(node.id), center.x, labelY);
+  // 黑色字体
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#111";
   ctx.fillText(String(node.id), center.x, labelY);
+  ctx.restore();
 
   ctx.fillStyle = UI.textSub;
   ctx.font = `12px "Microsoft YaHei", Arial`;
@@ -1176,6 +1245,38 @@ resetButton.addEventListener("click", () => {
 
 canvas.addEventListener("click", handleCanvasClick);
 canvas.addEventListener("contextmenu", handleCanvasContextMenu);
+
+// 支持触摸点击（单指触摸模拟左键点击）
+canvas.addEventListener("touchstart", function(e) {
+  if (e.touches.length === 1) {
+    const touch = e.touches[0];
+    handleCanvasClick({
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => e.preventDefault()
+    });
+    e.preventDefault();
+  }
+});
+
+// 支持长按模拟右键（长按500ms触发右键）
+let touchTimer = null;
+canvas.addEventListener("touchstart", function(e) {
+  if (e.touches.length === 1) {
+    touchTimer = setTimeout(() => {
+      const touch = e.touches[0];
+      handleCanvasContextMenu({
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        preventDefault: () => e.preventDefault()
+      });
+    }, 500); // 长按500ms触发右键
+  }
+});
+canvas.addEventListener("touchend", function(e) {
+  if (touchTimer) clearTimeout(touchTimer);
+});
+
 function handleCanvasMouseMove(event) {
   const p = getCanvasPoint(event);
   mouseX = p.x;
